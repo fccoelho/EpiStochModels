@@ -27,6 +27,7 @@ class SIR
 {
     uint[3] inits;
     uint[] S, I, R;
+    uint S0, I0, R0;
     double[] ts;
     uint N;
     double beta;
@@ -46,6 +47,9 @@ class SIR
     */
     void initialize(uint S, uint I, uint R)
     {
+        S0 = S;
+        I0 = I;
+        R0 = R;
         this.S ~= S;
         this.I ~= I;
         this.R ~= R;
@@ -59,6 +63,12 @@ class SIR
     */
     Tuple!(double[], uint[], uint[], double[]) run(const double t0, const double tf, uint seed = 7687738)
     {
+        if (this.ts.length > 1){
+            this.ts = [ t0];
+            this.S = [ S0];
+            this.I = [ I0];
+            this.R = [ R0];
+        }
         this.ts ~= t0;
         auto rng = Random(seed);
         auto urv = uniformVar!double(0.0, 1.0);
@@ -114,6 +124,12 @@ class SIR_Dem : SIR
 
     override Tuple!(double[], uint[], uint[], double[]) run(const double t0, const double tf, uint seed = 76838)
     {
+        if (this.ts.length > 1){
+            this.ts = [ t0];
+            this.S = [ S0];
+            this.I = [ I0];
+            this.R = [ R0];
+        }
         ts ~= t0;
         auto rng = Random(seed);
         auto urv = uniformVar!double(0.0, 1.0);
