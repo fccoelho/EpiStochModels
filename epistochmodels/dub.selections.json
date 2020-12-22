@@ -1,11 +1,12 @@
 {
 	"fileVersion": 1,
 	"versions": {
-		"mir": "3.2.0",
-		"mir-algorithm": "3.5.6",
-		"mir-core": "1.0.2",
-		"mir-linux-kernel": "1.0.1",
-		"mir-random": "2.2.6",
-		"pyd": "0.12.0"
+		"mir": "3.2.2",
+		"mir-algorithm": "3.5.7",
+		"mir-core": "1.0.3",
+		"mir-linux-kernel": "1.1.0",
+		"mir-random": "2.2.15",
+		"pyd": "0.14.0",
+		"silly": "1.0.2"
 	}
 }

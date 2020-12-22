@@ -15,6 +15,7 @@ import std.typecons : tuple, Tuple;
 import core.exception : RangeError;
 import mir.random;
 import mir.random.variable : uniformVar, exponentialVar;
+// import mir.random.ndvariable: multinomialVar;
 import mir.interpolate.linear;
 import multinomial: multinomialVar;
 import mir.array.allocation;
@@ -55,8 +56,7 @@ class SIR
         this.R ~= R;
     }
     /**
-    Starts simulation.
-
+    Runs simulation from `t0` to `tf`.
     Params:
         t0 = initial time
         tf = final time
@@ -100,7 +100,7 @@ class SIR
             }
         }
 
-        writefln("last R: %s", R);
+        //writefln("last R: %s", R);
         auto res = tuple(this.ts, this.S, this.I, dts);
 
         return res;
@@ -146,9 +146,9 @@ class SIR_Dem : SIR
             prec = gam * I[$ - 1] / R; /// Probability of the next event being a recovery (I -> I-1)
             pds = alpha * S[$ - 1] / R; /// Probability of the next event being a death of an S (S -> S-1)
             pdi = alpha * I[$ - 1] / R; /// Probability of the next event being a death of an I (I -> I-1)
-            auto ev = multinomialVar(1, [pbirth, pinf, prec, pds, pdi]).enumerate.maxElement!"a.value"[0];
+            const auto ev = multinomialVar(1, [pbirth, pinf, prec, pds, pdi]).enumerate.maxElement!"a.value"[0];
             auto erv = exponentialVar!double(1.0 / R);
-            double dt = erv(rng);
+            const double dt = erv(rng);
             if (ev == 0)
             { ///event is a birth
                 this.S ~= this.S[$ - 1] + 1;
@@ -238,6 +238,11 @@ class Influenza
         this.C0 = C0;
         this.R0 = R0;
     }
+    /**
+    Runs the model from t0 to tf
+    t0: Inintial time
+    tf: Final time
+    */
     Tuple!(double[], int[][]) run(double t0, double tf)
     {
         int[][] state;
@@ -247,16 +252,16 @@ class Influenza
         double t = 0;
         while (t < tf) //& (state[$-1][2] + state[$-1][1]+ state[$-1][3]>0))
         {
-            int S = state[$-1][0];
-            int V = state[$-1][1];
-            int I = state[$-1][2];
-            int C = state[$-1][3];
-            int R = state[$-1][4];
+            const int S = state[$-1][0];
+            const int V = state[$-1][1];
+            const int I = state[$-1][2];
+            const int C = state[$-1][3];
+            const int R = state[$-1][4];
 
-            double T = m*N + (1-pi)*ff["beta"](t)/N*S*I + phi*S + pi*ff["beta"](t)/N*S*I + e*ff["nu"](t)*S + m*S + w*V + ff["beta_v"](t)*V*I/N + m*V + r*I + m*I + rc*C + m*C + ff["gam"](t)*R + m*R;
+            const double T = m*N + (1-pi)*ff["beta"](t)/N*S*I + phi*S + pi*ff["beta"](t)/N*S*I + e*ff["nu"](t)*S + m*S + w*V + ff["beta_v"](t)*V*I/N + m*V + r*I + m*I + rc*C + m*C + ff["gam"](t)*R + m*R;
             auto erv = exponentialVar!double(1.0 / T);
-            auto urv = uniformVar!double(0.0, 1.0);
-            double dt = erv(rne);//-log(urv(rng))/T;
+            //auto urv = uniformVar!double(0.0, 1.0);
+            const double dt = erv(rne);//-log(urv(rng))/T;
             auto ev = multinomialVar(1, [m*N/T,
                                  ((1-pi)*ff["beta"](t)/N*S*I)/T,
                                  (phi*S)/T,

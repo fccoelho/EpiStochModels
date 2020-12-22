@@ -20,7 +20,7 @@ import mir.random.variable : uniformVar, exponentialVar, binomialVar;
    C.S. David, The computer generation of multinomial random variates,
    Comp. Stat. Data Anal. 16 (1993) 205-217
 */
-size_t[] multinomialVar(const uint N,  double[] probs)
+nothrow @safe size_t[] multinomialVar(const uint N,  double[] probs)
 {
     double norm = 0.0;
     double sum_p = 0.0;
@@ -58,12 +58,14 @@ size_t[] multinomialVar(const uint N,  double[] probs)
     }
     return n;
 }
-
-unittest{
-    int n = 10000;
+@("Correct sum")
+nothrow @safe unittest{
+    uint n = 10_000;
     foreach(i; 1..10){
-        auto sample = multinomialVar(n, [1.0/6, 2.0/6, 3.0/6]);
-        writeln(sample);
+        double[3] p = [1.0/6, 2.0/6, 3.0/6];
+        auto sample = multinomialVar(n, p);
+        assert(sum(sample) == n);
+        //writeln(sample);
     }
     auto sample = multinomialVar( n, [ 32, 10, 100]);
     assert(sum(sample) == n);

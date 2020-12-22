@@ -8,7 +8,8 @@
 		"mir-algorithm": "~>3.5.6",
 		"mir-core": "~>1.0.2",
 		"mir-random": "~>2.2.6",
-		"pyd": "~>0.12.0"
+		"pyd": "~>0.14.0",
+		"silly": "~>1.0.2"
 	},
 	"description": "CTMC epidemic models in D for Python",
 	"license": "MIT",
@@ -16,8 +17,7 @@
 	"sourcePaths": [
 		"source/"
 	],
-	"target": "library",
 	"subConfigurations": {
-		"pyd": "python37"
+		"pyd": "python38"
 	}
 }
