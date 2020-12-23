@@ -18,7 +18,7 @@
 # -- Project information -----------------------------------------------------
 
 project = 'EpiStochModels'
-copyright = '2019, Flavio Codeço Coelho'
+copyright = '2019-2021mk, Flavio Codeço Coelho'
 author = 'Flavio Codeço Coelho'
 
 # The full version, including alpha/beta/rc tags

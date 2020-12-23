@@ -21,8 +21,7 @@ void main()
     auto sim = model.run(0, tf);
     sw.stop();
     writeln(sw.peek());
-    writefln("Number of steps: %s, %s,%s,%s", sim[0].length, sim[1].length,
-            sim[2].length, sim[3].length);
+    writefln("Number of steps: %s", sim[0].length);
 
     File outf = File("sim.csv", "w");
     outf.writeln("time,S,I,dt");
@@ -30,11 +29,11 @@ void main()
     {
         try
         {
-            outf.writefln("%s,%s,%s,%s", t, sim[1][i], sim[2][i], sim[3][i]);
+            outf.writefln("%s,%s,%s,%s", t, sim[1][i][0], sim[1][i][1], sim[1][i][2]);
         }
         catch (RangeError e)
         {
-            writefln("t: %s\t S: %s\t I: %s\t dt:%s", t, sim[1][i], sim[2][i], sim[3][i]);
+            writefln("t: %s\t S: %s\t I: %s\t dt:%s", t, sim[1][i][0], sim[1][i][1], sim[1][i][2]);
         }
     }
     outf.close();
@@ -45,6 +44,5 @@ void main()
     auto sim2 = model2.run(0, tf);
     sw.stop();
     writeln(sw.peek());
-    writefln("Number of steps for SIR_Dem: %s, %s,%s,%s", sim2[0].length, sim2[1].length,
-            sim2[2].length, sim2[3].length);
+    writefln("Number of steps for SIR_Dem: %s", sim2[0].length);
 }

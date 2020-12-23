@@ -34,6 +34,8 @@ class SIR
     uint N;
     double beta;
     double gam;
+    int[][] tmat = [[-1,1,0], //infection
+                    [0,-1,1]]; // recovery
     this(const uint N, const double beta, const double gam)
     {
         this.N = N;
@@ -49,9 +51,9 @@ class SIR
     */
     void initialize(uint S, uint I, uint R)
     {
-        S0 = S;
-        I0 = I;
-        R0 = R;
+        this.S0 = S;
+        this.I0 = I;
+        this.R0 = R;
         this.S ~= S;
         this.I ~= I;
         this.R ~= R;
@@ -62,49 +64,56 @@ class SIR
         t0 = initial time
         tf = final time
     */
-    Tuple!(double[], uint[], uint[], double[]) run(const double t0,
+    Tuple!(double[], uint[][]) run(const double t0,
             const double tf, uint seed = 7687738)
-    {
-        if (this.ts.length > 1)
-        {
-            this.ts = [t0];
-            this.S = [S0];
-            this.I = [I0];
-            this.R = [R0];
-        }
+    {   
+        uint[][] state;
+        state ~= [this.S0, this.I0, this.R0];
         this.ts ~= t0;
         auto rng = Random(seed);
         auto urv = uniformVar!double(0.0, 1.0);
         double[] dts = [0];
         double T, U, pinf;
-        while ((this.ts[$ - 1] < tf) & (this.I[$ - 1] > 0))
+        int S = this.S0;
+        int I = this.I0;
+        int R = this.R0;
+        while ((this.ts[$ - 1] < tf) & (I > 0))
         {
+            S = state[$ - 1][0];
+            I = state[$ - 1][1];
+            R = state[$ - 1][2];
             U = urv(rng);
             // writeln(U);
-            T = this.beta * this.S[$ - 1] * this.I[$ - 1] / this.N + this.gam * this.I[$ - 1];
+            T = this.beta * S * I / this.N + this.gam * I;
             // if (S[$-1]==0){writefln("%s, %s, %s, %s, %s",beta,S[$-1],I[$-1], N, gam);}
-            pinf = ((this.beta / this.N) * this.S[$ - 1] * this.I[$ - 1]) / T; // Probability of next event being an infection
+            pinf = ((this.beta / this.N) * S * I) / T; // Probability of next event being an infection
             auto erv = exponentialVar!double(1.0 / T);
             double dt = erv(rng);
+            auto new_state = state[$ - 1].dup;
             if (U <= pinf)
             { // Next event is an infection
-                this.S ~= [this.S[$ - 1] - 1];
-                this.I ~= [this.I[$ - 1] + 1];
+                foreach (i,x; tmat[0])
+                {
+                    new_state[i] += x;
+                }
+                state ~= new_state;
                 this.ts ~= [this.ts[$ - 1] + dt];
                 dts ~= [dt];
             }
             else
             { // next event is a recovery
-                this.S ~= [this.S[$ - 1]];
-                this.I ~= [this.I[$ - 1] - 1];
-                // writeln("removal");
+                foreach (i,x; tmat[1])
+                {
+                    new_state[i] += x;
+                }
+                state ~= new_state;
                 this.ts ~= [this.ts[$ - 1] + dt]; // -np.log(rand())/R);
                 dts ~= [dt];
             }
         }
 
         //writefln("last R: %s", R);
-        auto res = tuple(this.ts, this.S, this.I, dts);
+        auto res = tuple(this.ts, state);
 
         return res;
     }
@@ -113,10 +122,10 @@ class SIR
 @("SIR basic run")
 unittest{
     SIR model = new SIR(1000, 0.7, 0.2);
-    model.initialize(999,1,0);
-    auto res = model.run(0, 100);
-    writeln("S(tf):", res[2][$-1]);
-    assert(res[2][$-1]==0);
+    model.initialize(990,10,0);
+    auto res = model.run(0, 1000);
+    writeln("SIR final state:", res[1][$-1]);
+    assert(res[1][$-1][1]==0);
 }
 
 /**
@@ -127,14 +136,22 @@ class SIR_Dem : SIR
     private
     {
         double alpha;
+        int[][] tmat = [[1,0,0], // birth
+                    [-1,1,0], // infection
+                    [0,-1,1], // recovery
+                    [-1,0,0], // death of an S
+                    [0,-1,0], // death of an I
+                    [0,0,-1] // death of an R
+                    ];
     }
     this(const uint N, const double alpha, const double beta, const double gamma)
     {
         super(N, beta, gamma);
         this.alpha = alpha;
+        
     }
 
-    override Tuple!(double[], uint[], uint[], double[]) run(const double t0,
+    override Tuple!(double[], uint[][]) run(const double t0,
             const double tf, uint seed = 76838)
     {
         if (this.ts.length > 1)
@@ -144,54 +161,46 @@ class SIR_Dem : SIR
             this.I = [I0];
             this.R = [R0];
         }
-        ts ~= t0;
+        double[] ts = [t0];
+        uint[][] state;
+        state ~= [S0,I0,R0];
         auto rng = Random(seed);
         auto urv = uniformVar!double(0.0, 1.0);
         double[] dts = [0];
-        double R, U, pinf, prec, pbirth, pds, pdi;
-        while ((ts[$ - 1] < tf) & (I[$ - 1] > 0))
+        double t = 0;
+        double T, U, pinf, prec, pbirth, pds, pdi, pdr;
+        while (ts[$ - 1] < tf) //& (I[$ - 1] > 0)
         {
+            const int S = state[$ - 1][0];
+            const int I = state[$ - 1][1];
+            const int R = state[$ - 1][2];
+            N = S+I+R;
             U = urv(rng);
-            R = alpha * N + beta * S[$ - 1] * I[$ - 1] / N + gam * I[$ - 1]
-                + alpha * S[$ - 1] + alpha * I[$ - 1];
-            pbirth = alpha * N / R; /// Probability of the next event being a birth (S -> S+1)
-            pinf = ((beta / N) * S[$ - 1] * I[$ - 1]) / R; /// Probability of next event being an infection
-            prec = gam * I[$ - 1] / R; /// Probability of the next event being a recovery (I -> I-1)
-            pds = alpha * S[$ - 1] / R; /// Probability of the next event being a death of an S (S -> S-1)
-            pdi = alpha * I[$ - 1] / R; /// Probability of the next event being a death of an I (I -> I-1)
-            const auto ev = multinomialVar(1, [pbirth, pinf, prec, pds, pdi])
+            T = alpha * N + beta * S * I / N + gam * I
+                + alpha * S + alpha * I;
+            pbirth = alpha * N / T; /// Probability of the next event being a birth (S -> S+1)
+            pinf = ((beta / N) * S * I) / T; /// Probability of next event being an infection
+            prec = (gam * I) / T; /// Probability of the next event being a recovery (I -> I-1)
+            pds = (alpha * S) / T; /// Probability of the next event being a death of an S (S -> S-1)
+            pdi = (alpha * I) / T; /// Probability of the next event being a death of an I (I -> I-1)
+            pdr = (alpha * R) / T; /// Probability of the next event being a death of an R (R -> R-1)
+            const auto ev = multinomialVar(1, [pbirth, pinf, prec, pds, pdi, pdr])
                 .enumerate.maxElement!"a.value"[0];
-            auto erv = exponentialVar!double(1.0 / R);
+            auto erv = exponentialVar!double(1.0 / T);
             const double dt = erv(rng);
-            if (ev == 0)
-            { ///event is a birth
-                this.S ~= this.S[$ - 1] + 1;
-                this.I ~= this.I[$ - 1];
+            auto new_state = state[$ - 1].dup;
+            foreach (i, x; tmat[ev])
+            {
+                new_state[i] += x;
             }
-            else if (ev == 1)
-            { ///  event is an infection
-                this.S ~= this.S[$ - 1] - 1;
-                this.I ~= this.I[$ - 1] + 1;
-            }
-            else if (ev == 2)
-            { /// event is a recovery
-                this.S ~= this.S[$ - 1];
-                this.I ~= this.I[$ - 1] - 1;
-            }
-            else if (ev == 3)
-            { /// event is a susceptible death
-                this.S ~= this.S[$ - 1] - 1;
-                this.I ~= this.I[$ - 1];
-            }
-            else if (ev == 4)
-            { /// next event is a infectious death
-                this.S ~= this.S[$ - 1];
-                this.I ~= this.I[$ - 1] - 1;
-            }
-            this.ts ~= this.ts[$ - 1] + dt;
+            state ~= new_state;
+            t += dt;
+            ts ~= t;
+            
+            // this.ts ~= this.ts[$ - 1] + dt;
             dts ~= dt;
         }
-        auto res = tuple(this.ts, this.S, this.I, dts);
+        auto res = tuple(ts, state);
         return res;
     }
 }
@@ -254,7 +263,7 @@ class SEIR{
         }
         uint[][] state;
         this.ts ~= t0;
-        auto rng = Random(seed);
+        // auto rng = Random(seed);
         state ~= [this.S0, this.E0, this.I0, this.R0];
         double[] ts = [t0];
         double t = t0;
@@ -276,7 +285,7 @@ class SEIR{
             pinf = ((this.beta / this.N) * S * I) / T; // Probability of next event being an infection
             pinc = this.e*E/T;
             auto erv = exponentialVar!double(1.0 / T);
-            double dt = erv(rng);
+            double dt = erv(rne);
             auto new_state = state[$ - 1].dup;
             auto ev = multinomialVar(1,[pinf,pinc,1-(pinf+pinc)]).enumerate.maxElement!"a.value"[0];
             foreach (i, x; tmat[ev])
@@ -300,7 +309,7 @@ unittest{
     SEIR model = new SEIR(1000, 0.7, 0.2, 0.3);
     model.initialize(999,1,0,0);
     auto res = model.run(0, 1000);
-    writeln("Final state: ",res[1][$-1]);
+    writeln("SEIR Final state: ",res[1][$-1]);
     assert(res[1][$-1][2]==0);
 }
 
