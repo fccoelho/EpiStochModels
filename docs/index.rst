@@ -13,6 +13,8 @@ Welcome to EpiStochModels's documentation!
    
    overview.rst
    quickstart.rst
+   notebooks/SIR.ipynb
+   notebooks/SEIR.ipynb
 
 
 
