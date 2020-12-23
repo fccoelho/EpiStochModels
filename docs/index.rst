@@ -10,6 +10,10 @@ Welcome to EpiStochModels's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+   
+   overview.rst
+   quickstart.rst
+
 
 
 Indices and tables
