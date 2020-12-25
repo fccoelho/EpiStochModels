@@ -8,19 +8,19 @@ import models: SIR, SIR_Dem;
 
 void main()
 {
-    double beta = 0.1;
-    double gam = 1. / 21;
-    int N = 150000;
+    double beta = 0.7;
+    double gam = 0.3;
+    int N = 100000;
     bool constant = false;
-    int I0 = 2;
-    double tf = 365.0;
+    int I0 = 10;
+    double tf = 1000;
     auto sw = StopWatch(AutoStart.no);
     auto model = new SIR(N, beta, gam);
     model.initialize(N-I0, I0, 0);
     sw.start();
     auto sim = model.run(0, tf);
     sw.stop();
-    writeln(sw.peek());
+    writeln("Time of the SIR run with N=100000: ", sw.peek());
     writefln("Number of steps: %s", sim[0].length);
 
     File outf = File("sim.csv", "w");
@@ -37,12 +37,12 @@ void main()
         }
     }
     outf.close();
-    double alpha = 0.1;
-    auto model2 = new SIR_Dem(N, alpha, beta, gam);
-    model2.initialize(N-I0, I0, 0);
-    sw.start();
-    auto sim2 = model2.run(0, tf);
-    sw.stop();
-    writeln(sw.peek());
-    writefln("Number of steps for SIR_Dem: %s", sim2[0].length);
+    // double alpha = 0.1;
+    // auto model2 = new SIR_Dem(N, alpha, beta, gam);
+    // model2.initialize(N-I0, I0, 0);
+    // sw.start();
+    // auto sim2 = model2.run(0, tf);
+    // sw.stop(); 
+    // writeln("Time of the SIR_Dem run with N=100000: ",sw.peek());
+    // writefln("Number of steps for SIR_Dem: %s", sim2[0].length);
 }

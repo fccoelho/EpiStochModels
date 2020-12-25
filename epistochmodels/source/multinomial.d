@@ -20,7 +20,7 @@ import mir.random.variable : uniformVar, exponentialVar, binomialVar;
    C.S. David, The computer generation of multinomial random variates,
    Comp. Stat. Data Anal. 16 (1993) 205-217
 */
-nothrow @safe size_t[] multinomialVar(const uint N,  double[] probs)
+nothrow @safe  size_t[] multinomialVar(const uint N,  const double[] probs)
 {
     double norm = 0.0;
     double sum_p = 0.0;
