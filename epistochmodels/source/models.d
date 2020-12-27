@@ -4,7 +4,7 @@ Author: Flávio Codeço Coelho<fccoelho@gmail.com>
 License: MIT
 */
 /** Copyright: Flávio Codeço Coelho */
-module epistochmodels.models;
+module models;
 
 import std.stdio;
 import std.math;
