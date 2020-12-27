@@ -10,7 +10,7 @@ void main()
 {
     double beta = 0.7;
     double gam = 0.3;
-    int N = 100000;
+    int N = 1000000;
     bool constant = false;
     int I0 = 10;
     double tf = 1000;

@@ -4,7 +4,7 @@ Author: Flávio Codeço Coelho<fccoelho@gmail.com>
 License: MIT
 */
 /** Copyright: Flávio Codeço Coelho */
-module models;
+module epistochmodels.models;
 
 import std.stdio;
 import std.math;
@@ -351,6 +351,7 @@ class Influenza
     */
     void add_forcing(string name, immutable double[] t, immutable double[] y)
     {
+        /// this.ff is a linear interpolation function of the data.
         this.ff[name] = linear!double(t.sliced, y.sliced);
     }
 
