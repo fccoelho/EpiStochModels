@@ -8,8 +8,8 @@ module models;
 
 import std.stdio;
 import std.math;
-import std.file;
 import std.parallelism;
+import std.algorithm: sum;
 import std.range : enumerate;
 import std.algorithm.searching;
 import std.typecons : tuple, Tuple;
@@ -64,10 +64,10 @@ class SIR
         t0 = initial time
         tf = final time
     */
-    Tuple!(double[], uint[][]) run(const double t0,
+    Tuple!(double[], int[][]) run(const double t0,
             const double tf, uint seed = 7687738)
     {   
-        uint[][] state;
+        int[][] state;
         state ~= [this.S0, this.I0, this.R0];
         double[] ts;
         ts ~= t0;
@@ -92,20 +92,13 @@ class SIR
             auto new_state = state[$ - 1].dup;
             if (U <= pinf)
             { // Next event is an infection
-                foreach (i,x; tmat[0])
-                {
-                    new_state[i] += x;
-                }
+                new_state[] += tmat[0][];
                 state ~= new_state;
                 ts ~= [ts[$ - 1] + dt];
-                
             }
             else
             { // next event is a recovery
-                foreach (i,x; tmat[1])
-                {
-                    new_state[i] += x;
-                }
+                new_state[] += tmat[1][];
                 state ~= new_state;
                 ts ~= [ts[$ - 1] + dt]; // -np.log(rand())/R);
                 
@@ -137,12 +130,12 @@ class SIR_Dem : SIR
     {
         double alpha;
         immutable int[][] tmat = [[1,0,0], // birth
-                    [-1,1,0], // infection
-                    [0,-1,1], // recovery
-                    [-1,0,0], // death of an S
-                    [0,-1,0], // death of an I
-                    [0,0,-1] // death of an R
-                    ];
+                                  [-1,1,0], // infection
+                                  [0,-1,1], // recovery
+                                  [-1,0,0], // death of an S
+                                  [0,-1,0], // death of an I
+                                  [0,0,-1] // death of an R
+                                ];
     }
     this(const uint N, const double alpha, const double beta, const double gamma)
     {
@@ -151,19 +144,19 @@ class SIR_Dem : SIR
         
     }
 
-    override Tuple!(double[], uint[][]) run(const double t0,
+    override Tuple!(double[], int[][]) run(const double t0,
             const double tf, uint seed = 76838)
     {
        
         double[] ts = [t0];
-        uint[][] state;
+        int[][] state;
         state ~= [S0,I0,R0];
         
         auto urv = uniformVar!double(0.0, 1.0);
         double[] dts = [0];
         double t = 0;
         double T, U, pinf, prec, pbirth, pds, pdi, pdr;
-        while (ts[$ - 1] < tf) //& (I[$ - 1] > 0)
+        while (ts[$ - 1] < tf) 
         {
             const int S = state[$ - 1][0];
             const int I = state[$ - 1][1];
@@ -182,10 +175,7 @@ class SIR_Dem : SIR
             auto erv = exponentialVar!double(1.0 / T);
             const double dt = erv(rne);
             auto new_state = state[$ - 1].dup;
-            foreach (i, x; tmat[ev])
-            {
-                new_state[i] += x;
-            }
+            new_state[] += tmat[ev][];
             state ~= new_state;
             t += dt;
             ts ~= t;
@@ -196,6 +186,17 @@ class SIR_Dem : SIR
         auto res = tuple(ts, state);
         return res;
     }
+}
+
+@("SIR_Dem basic run")
+unittest{
+    int pop = 1000;
+    int I0 = 10;
+    auto model = new SIR_Dem(pop, 0.1, 0.7, 0.2);
+    model.initialize(pop-I0,I0,0);
+    auto res = model.run(0, 1000);
+    writeln("SIR_Dem final state:", res[1][$-1]);
+    // assert(sum(res[1][$-1]) == pop);
 }
 
 /**
@@ -243,7 +244,7 @@ class SEIR{
         t0 = initial time
         tf = final time
     */
-    Tuple!(double[], uint[][]) run(const double t0,
+    Tuple!(double[], int[][]) run(const double t0,
             const double tf, uint seed = 7687738)
     {
         if (this.ts.length > 1)
@@ -254,7 +255,7 @@ class SEIR{
             this.I = [this.I0];
             this.R = [this.R0];
         }
-        uint[][] state;
+        int[][] state;
         this.ts ~= t0;
         // auto rng = Random(seed);
         state ~= [this.S0, this.E0, this.I0, this.R0];
@@ -281,10 +282,7 @@ class SEIR{
             double dt = erv(rne);
             auto new_state = state[$ - 1].dup;
             auto ev = multinomialVar(1,[pinf,pinc,1-(pinf+pinc)]).enumerate.maxElement!"a.value"[0];
-            foreach (i, x; tmat[ev])
-            {
-                new_state[i] += x;
-            }
+            new_state[] += tmat[ev][];
             state ~= new_state;
             t += dt;
             ts ~= t;
@@ -401,13 +399,7 @@ class Influenza
                     (m * R) / T
                     ]).enumerate.maxElement!"a.value"[0];
             auto new_state = state[$ - 1].dup;
-            foreach (i, x; tmat[ev])
-            {
-                new_state[i] += x;
-            }
-            //writefln("t: %s",t);
-            //writefln("dt: %s",dt);
-            //writeln(ev);
+            new_state[] += tmat[ev][];
             state ~= new_state;
             t += dt;
             ts ~= t;
