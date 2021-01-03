@@ -40,7 +40,7 @@ class CTMC{
         this.tmat = transmatrix;
         this.propensities = props;
     } 
-    void initialize(int[] inits, double[string] pars) pure {
+    void initialize(int[] inits, double[string] pars) {
         assert(inits.length == this.tmat[0].length); /// one state var per column in the Trans. matrix.
         this.inits = inits;
         this.pars = pars;
@@ -91,9 +91,9 @@ unittest{
         (v,p)=> p["mu"]*v[1] // death
         ];
     CTMC model = new CTMC(tmat, props);
-    model.initialize([999,1,0,0],pars);
+    model.initialize([995,5,0,0],pars);
     auto res = model.run(0, 1000);
-    writeln("SIRD final state:", res[1][$-1]);
+    writeln("CTMC (SIRD) final state:", res[1][$-1]);
     // assert(res[1][$-1][1]==0);
 }
 
@@ -496,4 +496,6 @@ extern (C) void PydMain()
             const double), Def!(SEIR.run), Def!(SEIR.initialize))();
     wrap_class!(Influenza, Init!(uint, double[]), Def!(Influenza.initialize),
             Def!(Influenza.add_forcing), Def!(Influenza.run))();
+    wrap_class!(CTMC, Def!(CTMC.initialize), Def!(CTMC.run), Init!(int[][],
+            double delegate (int[], double[string])[]))();
 }

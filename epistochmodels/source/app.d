@@ -10,7 +10,7 @@ void main()
 {
     double beta = 0.7;
     double gam = 0.3;
-    int N = 1000000;
+    int N = 1_000_000;
     bool constant = false;
     int I0 = 10;
     double tf = 1000;
@@ -20,7 +20,7 @@ void main()
     sw.start();
     auto sim = model.run(0, tf);
     sw.stop();
-    writeln("Time of the SIR run with N=100000: ", sw.peek());
+    writefln("Time of the SIR run with N=%s: %s",N, sw.peek());
     writefln("Number of steps: %s", sim[0].length);
 
     File outf = File("sim.csv", "w");
