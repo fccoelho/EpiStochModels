@@ -25,6 +25,78 @@ import mir.ndslice;
 import mir.ndslice.fuse;
 import pyd.pyd;
 
+/**
+General CTMC model defined only by its transition matrix and propensity functions.
+*/
+class CTMC{
+    alias double delegate(int[], double[string]) pf; /// propensity function: f(inits, pars)
+    int [][] tmat; /// transitionTransition matrix
+    pf[] propensities; /// array of propensity functions for each kind of transitions
+    int[] inits; /// initial values
+    double[string] pars; /// parameter values
+
+    this(int[][] transmatrix, pf[] props){
+        assert(props.length == transmatrix.length); /// one line per propensity
+        this.tmat = transmatrix;
+        this.propensities = props;
+    } 
+    void initialize(int[] inits, double[string] pars) pure {
+        assert(inits.length == this.tmat[0].length); /// one state var per column in the Trans. matrix.
+        this.inits = inits;
+        this.pars = pars;
+    }
+    Tuple!(double[], int[][]) run(double t0, double tf){
+        int[][] state;
+        state ~= this.inits;
+        double[] probs;
+        probs.length = this.propensities.length;
+        double[] ts = [t0];
+        double t = 0;
+        double T;
+        while (ts[$-1] < tf){
+            T = 0; /// Reset total propensity
+            foreach(i, f; this.propensities){ /// sum of propensities
+                double p = f(state[$-1], this.pars);
+                probs[i] = p;
+                T += p;
+            }
+            probs[] /= T; /// Probabilities for each transition
+            auto erv = exponentialVar!double(1.0 / T);
+            double dt = erv(rne);
+            auto new_state = state[$ - 1].dup;
+            auto ev = multinomialVar(1,probs).enumerate.maxElement!"a.value"[0];
+            new_state[] += tmat[ev][];
+            state ~= new_state;
+            t += dt;
+            ts ~= t;
+        }
+        return tuple(ts, state);
+    }
+}
+
+@("CTMC basic run (SIRD model)")
+unittest{
+    int[][] tmat = [[-1,1,0,0],
+                    [0,-1,1,0], 
+                    [0,-1,0,1]];
+    double[string] pars = [
+        "beta": 0.3,
+        "gam": 0.05,
+        "mu": 0.01
+    ];
+    alias double delegate(int[], double[string]) dy;
+    dy[] props = [
+        (v,p)=> p["beta"]*v[0]*v[1]/sum(v[0..$-1]), // infection
+        (v,p)=> p["gam"]*v[1], // recovery
+        (v,p)=> p["mu"]*v[1] // death
+        ];
+    CTMC model = new CTMC(tmat, props);
+    model.initialize([999,1,0,0],pars);
+    auto res = model.run(0, 1000);
+    writeln("SIRD final state:", res[1][$-1]);
+    // assert(res[1][$-1][1]==0);
+}
+
 ///SIR model class.
 class SIR
 {
@@ -374,7 +446,7 @@ class Influenza
         auto rng = Random(2345);
         state ~= [S0, V0, I0, C0, R0];
         double[] ts = [t0];
-        double t = 0;
+        double t = t0;
         while (t < tf) //& (state[$-1][2] + state[$-1][1]+ state[$-1][3]>0))
         {
             const int S = state[$ - 1][0];
