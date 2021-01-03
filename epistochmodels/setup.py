@@ -8,7 +8,7 @@ projName = "epistochmodels"
 
 setup(
     name=projName,
-    version='0.2',
+    version='0.3',
     ext_modules=[
         Extension(projName, ['source/models.d', 'source/multinomial.d'],
                   include_dirs=build_pars['importPaths'],
