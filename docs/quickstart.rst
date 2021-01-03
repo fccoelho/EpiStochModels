@@ -32,7 +32,7 @@ The *D* code above can be run with the following command:
 
     $ dub run --build=release --single sir_example.d
 
-Implementing you own CTMC models
+Implementing your own CTMC models
 -----------------------------------
 If you are willing to write `D` code, EpiStochModels also provides 
 a class to simulate any CTMC model you want, as long as you provide 
