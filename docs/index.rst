@@ -15,6 +15,7 @@ Welcome to EpiStochModels's documentation!
    quickstart.rst
    notebooks/SIR.ipynb
    notebooks/SEIR.ipynb
+   notebooks/CTMC.ipynb
 
 
 
