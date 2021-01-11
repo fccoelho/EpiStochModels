@@ -27,11 +27,12 @@ void main()
         (v, p) => p["gam"] * v[1], // recovery
         (v, p) => p["mu"] * v[1] // death
     ];
-    CTMC model = new CTMC(tmat, props);
+    CTMC model = new CTMC(tmat, props, ["S", "I", "R", "D"], ["beta", "gamma", "mu"]);
     model.initialize([995, 5, 0, 0], pars);
     auto sw = StopWatch(AutoStart.no);
     sw.start();
     auto res = model.run(0, 1000);
+    model.save("CTMC.csv", res);
     sw.stop();
-    writeln("Time of the SIR run with N=1000: ", sw.peek());
+    writeln("Time of the SIRD run with N=1000: ", sw.peek());
 }

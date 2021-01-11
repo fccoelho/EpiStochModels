@@ -7,6 +7,7 @@ License: MIT
 module models;
 
 import std.stdio;
+import std.file;
 import std.math;
 import std.parallelism;
 import std.algorithm: sum;
@@ -34,17 +35,45 @@ class CTMC{
     pf[] propensities; /// array of propensity functions for each kind of transitions
     int[] inits; /// initial values
     double[string] pars; /// parameter values
+    string[] varnames; /// variable names
+    string[] parnames; /// parameter names
 
-    this(int[][] transmatrix, pf[] props){
+    this(int[][] transmatrix, pf[] props, string[] varnames, string[] parnames){
         assert(props.length == transmatrix.length); /// one line per propensity
         this.tmat = transmatrix;
         this.propensities = props;
+        this.varnames = varnames;
+        this.parnames = parnames;
     } 
     void initialize(int[] inits, double[string] pars) {
         assert(inits.length == this.tmat[0].length); /// one state var per column in the Trans. matrix.
         this.inits = inits;
         this.pars = pars;
     }
+    /**
+    Save the simulation as a CSV file
+    */
+    void save(string filename, Tuple!(double[], int[][]) data)
+    {
+        import std.array: join;
+        import std.conv: text;
+        File outf = File(filename, "w");
+        auto head = join(this.varnames, ",");
+        outf.writeln("t,", head);
+        foreach (i, int[] row; data[1])
+        {
+            try
+            {// writes t on column 0
+                outf.writeln(text(data[0][i]), ",", row.map!text.join(","));
+            }
+            catch (RangeError e)
+            {
+                writefln("Some error %s: %s", e, row);
+            }
+        }
+        outf.close();
+    }
+
     Tuple!(double[], int[][]) run(double t0, double tf){
         int[][] state;
         state ~= this.inits;
@@ -90,10 +119,11 @@ unittest{
         (v,p)=> p["gam"]*v[1], // recovery
         (v,p)=> p["mu"]*v[1] // death
         ];
-    CTMC model = new CTMC(tmat, props);
+    CTMC model = new CTMC(tmat, props, ["S", "I", "R", "D"], ["beta", "gamma", "mu"]);
     model.initialize([995,5,0,0],pars);
     auto res = model.run(0, 1000);
     writeln("CTMC (SIRD) final state:", res[1][$-1]);
+    model.save("SIRD.csv", res);
     // assert(res[1][$-1][1]==0);
 }
 
@@ -496,6 +526,6 @@ extern (C) void PydMain()
             const double), Def!(SEIR.run), Def!(SEIR.initialize))();
     wrap_class!(Influenza, Init!(uint, double[]), Def!(Influenza.initialize),
             Def!(Influenza.add_forcing), Def!(Influenza.run))();
-    wrap_class!(CTMC, Def!(CTMC.initialize), Def!(CTMC.run), Init!(int[][],
-            double delegate (int[], double[string])[]))();
+    wrap_class!(CTMC, Def!(CTMC.initialize), Def!(CTMC.run), Def!(CTMC.save), Init!(int[][],
+            double delegate (int[], double[string])[], string[], string[]))();
 }
