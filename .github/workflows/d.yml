@@ -21,6 +21,8 @@ jobs:
 
     - name: 'Build & Test'
       run: |
+        # install python headers
+        apt install python3-dev
         # Build the project, with its main file included, without unittests
         dub build --compiler=$DC
         # Build and run tests, as defined by `unittest` configuration
