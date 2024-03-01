@@ -454,7 +454,7 @@ class Influenza
     void add_forcing(string name, immutable double[] t, immutable double[] y)
     {
         /// this.ff is a linear interpolation function of the data.
-        this.ff[name] = linear!double(t.sliced, y.sliced);
+        this.ff[name] = linear!double(t.rcslice!(immutable double), y.rcslice!(immutable double));
     }
 
     void initialize(uint S0, uint I0, uint V0, uint C0, uint R0)
