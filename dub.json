@@ -5,11 +5,11 @@
 	"copyright": "Copyright © 2019, Flávio Codeco Coelho",
 	"dependencies": {
 		"mir": "~>3.2.3",
-		"mir-algorithm": "~>3.22.0",
-		"mir-core": "~>1.6.0",
-		"mir-random": "~>2.2.19",
-		"pyd": "~>0.14.3",
-		"silly": "~>1.1.1"
+		"mir-algorithm": "~>3.22.4",
+		"mir-core": "~>1.7.3",
+		"mir-random": "~>2.2.20",
+		"pyd": "~>0.14.5",
+		"silly": "~>1.2.0"
 	},
 	"description": "CTMC epidemic models in D for Python",
 	"license": "MIT",
@@ -18,6 +18,6 @@
 		"source/"
 	],
 	"subConfigurations": {
-		"pyd": "python39"
+		"pyd": "python313"
 	}
 }
