@@ -6,7 +6,6 @@
 		"mir-core": "1.7.3",
 		"mir-linux-kernel": "1.2.1",
 		"mir-random": "2.2.20",
-		"pyd": "0.14.5",
-		"silly": "1.2.0-dev.2"
+		"silly": "1.1.1"
 	}
 }

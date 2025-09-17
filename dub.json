@@ -8,15 +8,12 @@
 		"mir-algorithm": "~>3.22.4",
 		"mir-core": "~>1.7.3",
 		"mir-random": "~>2.2.20",
-		"silly": "~>1.2.0-dev.2"
+		"silly": "~>1.1.1"
 	},
 	"description": "CTMC epidemic models in D",
 	"license": "MIT",
 	"name": "epistochmodels",
 	"sourcePaths": [
 		"source/"
-	],
-	"subConfigurations": {
-		// "pyd": "python313"
-	}
+	]
 }
