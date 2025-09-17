@@ -3,10 +3,10 @@
 	"versions": {
 		"mir": "3.2.3",
 		"mir-algorithm": "3.22.4",
-		"mir-core": "1.6.0",
+		"mir-core": "1.7.3",
 		"mir-linux-kernel": "1.2.1",
 		"mir-random": "2.2.20",
 		"pyd": "0.14.5",
-		"silly": "1.1.1"
+		"silly": "1.2.0-dev.2"
 	}
 }

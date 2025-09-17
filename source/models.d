@@ -24,7 +24,7 @@ import multinomial : multinomialVar;
 import mir.array.allocation;
 import mir.ndslice;
 import mir.ndslice.fuse;
-import pyd.pyd;
+// import pyd.pyd;
 
 /**
 General CTMC model defined only by its transition matrix and propensity functions.
@@ -413,7 +413,7 @@ class Influenza
 {
     double m, phi, pi, e, w, r, rc;
     /// ff - associative arrays to store forcing functions
-    Linear!(double, 1LU, immutable(double)*)[string] ff; 
+    Linear!(double, 1LU, double)[string] ff; 
     uint S0, I0, V0, C0, R0, N;
     /// tmat - transition matrix
     immutable int[][] tmat = [[1, 0, 0, 0, 0], 
@@ -451,10 +451,10 @@ class Influenza
     t: the t values
     y: the y values
     */
-    void add_forcing(string name, immutable double[] t, immutable double[] y)
+    void add_forcing(string name, immutable double[] t, const double[] y)
     {
         /// this.ff is a linear interpolation function of the data.
-        this.ff[name] = linear!double(t.rcslice!(immutable double), y.rcslice!(immutable double));
+        this.ff[name] = linear!double(t.rcslice!(immutable double), y.rcslice!(const double));
     }
 
     void initialize(uint S0, uint I0, uint V0, uint C0, uint R0)
@@ -515,17 +515,17 @@ class Influenza
 /**
 * Python wrapper
 */
-extern (C) void PydMain()
-{
-    module_init();
-    wrap_class!(SIR, Def!(SIR.initialize), Def!(SIR.run), Init!(const uint,
-            const double, const double))();
-    wrap_class!(SIR_Dem, Init!(const uint, const double, const double,
-            const double), Def!(SIR_Dem.run), Def!(SIR_Dem.initialize))();
-    wrap_class!(SEIR, Init!(const uint, const double, const double,
-            const double), Def!(SEIR.run), Def!(SEIR.initialize))();
-    wrap_class!(Influenza, Init!(uint, double[]), Def!(Influenza.initialize),
-            Def!(Influenza.add_forcing), Def!(Influenza.run))();
-    wrap_class!(CTMC, Def!(CTMC.initialize), Def!(CTMC.run), Def!(CTMC.save), Init!(int[][],
-            double delegate (int[], double[string])[], string[], string[]))();
-}
+// extern (C) void PydMain()
+// {
+//     module_init();
+//     wrap_class!(SIR, Def!(SIR.initialize), Def!(SIR.run), Init!(const uint,
+//             const double, const double))();
+//     wrap_class!(SIR_Dem, Init!(const uint, const double, const double,
+//             const double), Def!(SIR_Dem.run), Def!(SIR_Dem.initialize))();
+//     wrap_class!(SEIR, Init!(const uint, const double, const double,
+//             const double), Def!(SEIR.run), Def!(SEIR.initialize))();
+//     wrap_class!(Influenza, Init!(uint, double[]), Def!(Influenza.initialize),
+//             Def!(Influenza.add_forcing), Def!(Influenza.run))();
+//     wrap_class!(CTMC, Def!(CTMC.initialize), Def!(CTMC.run), Def!(CTMC.save), Init!(int[][],
+//             double delegate (int[], double[string])[], string[], string[]))();
+// }
