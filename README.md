@@ -1,7 +1,7 @@
 # EpiStochModels
 Continuous time stochastic epidemic models implemented in D. Python wrapper has been removed because PyD is no longer maintained.
 
-So now models must be written in `D` like exemplified in [`app.d`](source/app.d) and on [`CTMC_example.d`](docs/CTMC_example.d).  
+So now models must be written in `D` like exemplified in [`app.d`](source/app.d) and on [`CTMC_example.d`](docs/notebooks/CTMC_example.d).  
 
 D models writen followind the second example above, can be run like this:
 
