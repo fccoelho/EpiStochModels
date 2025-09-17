@@ -1,5 +1,13 @@
 # EpiStochModels
-Continuous time stochastic epidemic models implemented in D and wrapped in Python.
+Continuous time stochastic epidemic models implemented in D. Python wrapper has been removed because PyD is no longer maintained.
+
+So now models must be written in `D` like exemplified in [`app.d`](source/app.d) and on [`CTMC_example.d`](docs/CTMC_example.d).  
+
+D models writen followind the second example above, can be run like this:
+
+```bash
+dub run --build=release --single my_model.d
+```
 
 Check the [documentation](https://epistochmodels.readthedocs.io/en/latest/) for detailed instructions on how to install and use. You can also have a look at the example notebooks [here](docs/notebooks).
 
