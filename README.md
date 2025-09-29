@@ -1,9 +1,13 @@
 # EpiStochModels
-Continuous time stochastic epidemic models implemented in D. Python wrapper has been removed because PyD is no longer maintained.
+Continuous time stochastic epidemic models implemented in D. 
+The models are to be specified as continuous time Markov models, such as exemplified in the docs, through a transition matrix and an array of propensity functions.
+
+
+Python wrapper has been removed because PyD is no longer maintained.
 
 So now models must be written in `D` like exemplified in [`app.d`](source/app.d) and on [`CTMC_example.d`](docs/notebooks/CTMC_example.d).  
 
-D models writen followind the second example above, can be run like this:
+D models writen following the second example above, can be run like this:
 
 ```bash
 dub run --build=release --single my_model.d
@@ -19,7 +23,7 @@ In order to work on `EpiStochModels` you need to have [DMD](https://dlang.org/do
 ```bash
 source ~/dlang/ldc-1.27.1/activate.fish
 ```
-the line above, is for fish shell, if you use bash, do this (to use the DMD compiler)
+the line above, is for fish shell, if you use bash, do this (here using the DMD compiler)
 
 ```bash
 source ~/dlang/dmd-2.097.2/activate 
