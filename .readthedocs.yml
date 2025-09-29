@@ -10,7 +10,7 @@ build:
   apt_packages:
     - libasound2
   tools:
-    python: "3.11"
+    python: "3.8"
     nodejs: "16"
   jobs:
     post_install:
@@ -31,7 +31,6 @@ formats:
 
 # Optionally set the version of Python and requirements required to build your docs
 python:
-  version: 3.11
   install:
     - requirements: docs/requirements.txt
     - method: pip
