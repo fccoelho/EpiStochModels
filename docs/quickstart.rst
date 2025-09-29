@@ -18,7 +18,7 @@ Then you can build and install the Python package.
 We will publish the package on PyPI soon so that you will be able to simply pip install it.
 
 Using the Built-in Models
-----------------
+-------------------------
 The models can be used from Python  (see `notebooks <docs/notebooks>`_) or straight from D code:
 
 .. literalinclude:: notebooks/sir_example.d
@@ -46,13 +46,15 @@ are functions of the parameters and state-variables of the model.
 The code below is the implementation of a `SIRD model <https://en.wikipedia.org/wiki/Compartmental_models_in_epidemiology#The_SIRD_model>`_.
 
 .. mermaid::
-   :caption: SIRD Model transitions:
+   :caption: SIRD Model transitions
+
    graph TD 
         S -- infection --> I
         I -- recovery --> R
         I -- death --> D
 
 .. code-block:: D
+    
     // define the transition matrix
     int[][] tmat = [[-1,1,0,0],
                     [0,-1,1,0], 
